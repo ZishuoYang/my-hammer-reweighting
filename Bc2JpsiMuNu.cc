@@ -95,7 +95,7 @@ int main() {
     ham.addFFScheme("Scheme1", {{"BcJpsi", "BGL"}});
     //ham.setOptions("BctoJpsiBGL: {Chim: 0.007168, Chip: 0.012539}"); //Set options for FF parameters
     //ham.setOptions("BctoJpsiBGL: {avec: [0.003,-0.022,0.150] }"); //Set options for FF parameters
-    ham.setOptions("BctoJpsiBGL: {dvec: [0.10,-0.2132,0.008157] }"); //Set options for FF parameters
+    ham.setOptions("BctoJpsiBGL: {dvec: [0.,0.,0.] }"); //Set options for FF parameters
     //Can add more schemes eg: ham.addFFScheme("Scheme2", {{"BD", "CLN"}, {"BD*", "BGL"}});
     //Declare the input FF scheme
     ham.setFFInputScheme({{"BcJpsi", "EFG"}});
