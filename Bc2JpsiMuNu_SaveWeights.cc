@@ -35,7 +35,7 @@ int main() {
     TFile* outFile{new TFile{"./HammerWeights.root", "RECREATE"}};
     TTree *out_tree = tree->CloneTree(); // Can change to (0) to not copy data
     Double_t weight;
-    auto newBranch = out_tree->Branch("HammerWeight", &weight, "HammerWeight/D");
+    auto weight_branch = out_tree->Branch("HammerWeight", &weight, "HammerWeight/D");
     
     Hammer::IOBuffer buf{Hammer::RecordType::UNDEFINED, 0ul, new uint8_t[16*1024*1024]};
     tree->SetBranchAddress("record",buf.start, &brecord);
@@ -72,9 +72,8 @@ int main() {
             ham.initEvent();
             ham.loadEventWeights(buf);
             double evtwgt = ham.getWeight("Scheme1");
-	    weight = evtwgt; //save weight
-	    newBranch->Fill();//save weight
-            //We could have also done instead, without using evtIds:
+            
+	    //We could have also done instead, without using evtIds:
             //double evtwgt = 1.;
             //auto wgtmap = ham.getWeights("Scheme1"); //get all process weights in the event map<HashId, double>
             //for(auto& elem : wgtmap){
@@ -85,12 +84,23 @@ int main() {
             //double evtwgt = ham.getWeight("Scheme1", {proc1, proc2});
             //Store the computed weight in a vector<double>, or do whatever you want with it!
             evtwgts.push_back(evtwgt);
+	    if (i<10) {cout <<"i = "<< i << "," <<"evtwgt = "<< evtwgt << endl;} 
         }
         cout << endl << "Reweighted " << evtwgts.size() << " events to S_qLlL = " << val << "i, T_qLlL = " << val/4. << ": ";
-        for(size_t i =0; i < 9; ++i) {
+        for(auto i =0; i < 10; i++) {
             cout << evtwgts[i] << ", ";
         }
         cout << " ...." << endl;
+	// Update weight vector with correct order to fill tree
+	// because the tree has n+3 entries: [header, [weights], ?, ?]
+	evtwgts.insert( evtwgts.begin(), 0. );
+	evtwgts.insert( evtwgts.end(), 2, 0. );
+	//cout << "n entries: " << evtwgts.size() << " vs " << out_tree->GetEntries() << endl;
+        // Save weights into the new tree
+	for(int i =0; i < out_tree->GetEntries(); i++) {
+	    weight = evtwgts[i];
+	    weight_branch->Fill();
+        }
         auto rwgtend = std::chrono::system_clock::now();
         auto durrwgt = rwgtend - rwgtstart;
         typedef std::chrono::duration<float> float_seconds;
