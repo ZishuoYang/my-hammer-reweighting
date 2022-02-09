@@ -5,7 +5,6 @@
 
 #include "TFile.h"
 #include "TTree.h"
-#include "HepMCParser.hh"
 #include "Hammer/Hammer.hh"
 
 #include "TSystem.h"
@@ -36,7 +35,7 @@ int main() {
     TTree *out_tree = tree->CloneTree(); // Can change to (0) to not copy data
     Double_t weight;
     auto weight_branch = out_tree->Branch("HammerWeight", &weight, "HammerWeight/D");
-    
+
     Hammer::IOBuffer buf{Hammer::RecordType::UNDEFINED, 0ul, new uint8_t[16*1024*1024]};
     tree->SetBranchAddress("record",buf.start, &brecord);
     tree->SetBranchAddress("type",&buf.kind, &btype);
@@ -72,7 +71,7 @@ int main() {
             ham.initEvent();
             ham.loadEventWeights(buf);
             double evtwgt = ham.getWeight("Scheme1");
-            
+
 	    //We could have also done instead, without using evtIds:
             //double evtwgt = 1.;
             //auto wgtmap = ham.getWeights("Scheme1"); //get all process weights in the event map<HashId, double>
@@ -84,7 +83,7 @@ int main() {
             //double evtwgt = ham.getWeight("Scheme1", {proc1, proc2});
             //Store the computed weight in a vector<double>, or do whatever you want with it!
             evtwgts.push_back(evtwgt);
-	    if (i<10) {cout <<"i = "<< i << "," <<"evtwgt = "<< evtwgt << endl;} 
+	    if (i<10) {cout <<"i = "<< i << "," <<"evtwgt = "<< evtwgt << endl;}
         }
         cout << endl << "Reweighted " << evtwgts.size() << " events to S_qLlL = " << val << "i, T_qLlL = " << val/4. << ": ";
         for(auto i =0; i < 10; i++) {
